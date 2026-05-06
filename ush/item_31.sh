@@ -47,7 +47,7 @@ extract_versions() {
     local ver_file=$1
     
     # Extract lines with 'export', remove 'export', split by '=', and format
-    grep '^export ' "$ver_file" | while IFS="=" read -r var_name version; do
+    grep '^export ' "$ver_file"|grep _ver= | while IFS="=" read -r var_name version; do
         software=$(echo "$var_name" | sed 's/^export //; s/_ver$//')  # Remove 'export ' and '_ver'
 	version=$(echo "$version" | sed 's/^"//; s/"$//')  # Strip surrounding quotes from version
         echo "$software:$version"
@@ -108,6 +108,8 @@ compare_versions() {
     fi
 }
 
+
+
 # Main script logic to extract and compare versions
 echo "Extracting versions from $run_ver_file..."
 echo "==========================================="
@@ -118,11 +120,31 @@ echo "==========================================="
 cd $package_dir
 pwd
 echo "checking jobs/ ..."
-grep -l -e "module load " jobs/* jobs/*/* 2>/dev/null
+for file in `grep -l "module load " jobs/* jobs/*/*  2>/dev/null`; do 
+  msg=`grep -e "module load " $file`;
+  if [ $? != 0 ]; then
+    echo $file: $msg;
+  fi; 
+done 
+
+echo "==========================================="
 echo "checking scripts/ ..."
-grep -l -e "module load " scripts/*sh scripts/*/*sh  scripts/*/*/*sh 2>/dev/null
+for file in `grep -l "module load " scripts/*sh scripts/*/*sh  scripts/*/*/*sh 2>/dev/null`; do
+  msg=`grep -e "module load " $file`;
+  if [ $? != 0 ]; then
+    echo $file: $msg;
+  fi;
+done
+
+echo "==========================================="
 echo "checking ush/ ..."
-grep -l -e "module load " ush/* ush/*/* ush/*/*/* ush/*/*/*/*  2>/dev/null
+for file in `grep -l "module load " ush/* ush/*/* ush/*/*/* ush/*/*/*/* 2>/dev/null`; do
+  msg=`grep -e "module load " $file`;
+  if [ $? != 0 ]; then
+    echo $file: $msg;
+  fi;
+done
+echo "==========================================="
 
 
 #extract_versions "$run_ver_file" | while IFS=":" read -r software version; do 
@@ -139,4 +161,4 @@ echo "==========================================="
 # Cleanup temporary file
 rm -f "$tmpfile"
 
-echo "$0 Script completed."
+echo "$0 Script completed, exiting ..."
