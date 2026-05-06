@@ -82,6 +82,8 @@ path_to_exl=( "${exclArr[@]/#/-x }")
 #echo newdir=$dir1
 if [[ -d $dir0 && -d $dir1 ]]; then echo ""; else echo "This script takes atleast two arguments: olddir and newdir, could not find them, exiting"; exit; fi
 
+echo "Hello world!"
+
 diff_output=$(diff -rq ${path_to_exl[@]} $dir0 $dir1 | sort )
 
 # Process the diff output
