@@ -64,6 +64,26 @@ main() {
     echo "$0 usage: pkg_path"
     exit 1
   fi
+
+  ip_result=$( check_ip_addresses "${pkg_path}" )
+  phone_result=$( check_phone_numbers "${pkg_path}" )
+  data_xfer_result=$( check_data_transfer "${pkg_path}" )
+
+  err=0
+  if [[ -n "${ip_result}" ]]; then
+    err=1
+    echo "${ip_result}"
+  fi
+  if [[ -n "${phone_result}" ]]; then
+    err=1
+    echo "${phone_result}"
+  fi
+  if [[ -n "${data_xfer_result}" ]]; then
+    err=1
+    echo "${data_xfer_result}"
+  fi
+
+  exit ${err}
 }
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then

@@ -166,6 +166,38 @@ test_check_data_transfer_not_found(){
   teardown
 }
 
+test_main() {
+  setup
+
+  create_ip_addresses_script
+  create_phone_numbers_script
+  create_data_transfer_files
+
+  local output=$( main "${TMP_DIR}" )
+
+  if [[ \
+    "${output}" == *"WARNING: found 2 IP address match(es):"* \
+    && "${output}" == *"${TMP_DIR}/my_ip.sh:my_ip=192.168.1.1"* \
+    && "${output}" == *"${TMP_DIR}/my_ip.sh:another_ip=192.168.0.1"* \
+    && "${output}" == *"WARNING: found 6 phone number match(es):"* \
+    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num1="(123) 456-7890"'* \
+    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num2="(123)-456-7890"'* \
+    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num3="123-456-7890"'* \
+    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num4="123 456 7890"'* \
+    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num5="1234567890"'* \
+    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num6="123.456.7890"'* \
+    && "${output}" == *"WARNING: found 2 data transfer instance(s) with hard-coded sources or destinations:"* \
+    && "${output}" == *"${TMP_DIR}/dest.txt:DEST=login02"* \
+    && "${output}" == *"${TMP_DIR}/src.txt:SRC=login01"* \
+    ]]; then
+    pass "${FUNCNAME}"
+  else
+    fail "${FUNCNAME}" "One or more checks did not behave as expected. Output: \n${output}"
+  fi
+
+  teardown
+}
+
 main() {
   TEST_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   SCRIPT_UNDER_TEST=$( realpath "${TEST_DIR}/../ush/check_pii_security.sh" )
@@ -187,6 +219,7 @@ main() {
   test_check_phone_numbers_not_found
   test_check_data_transfer_found
   test_check_data_transfer_not_found
+  test_main
 
   echo "---------------------------------------------------"
   echo "Test run complete: ${PASSED} passed, ${FAILED} failed."
