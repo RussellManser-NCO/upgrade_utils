@@ -14,7 +14,7 @@ check_ip_addresses() {
 
 check_phone_numbers() {
   local path_to_check="$1"
-  local check=$( grep -rE '^\(?\d{3}\)?[\s.-?]?\d{3}[\s.-?]?\d{4}$' "${path_to_check}" )
+  local check=$( grep -rP '\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}' "${path_to_check}" )
 
   if [[ -n "${check}" ]]; then
     echo "WARNING: found $( echo "${check}" | wc -l ) phone number match(es):"

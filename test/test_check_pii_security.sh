@@ -82,8 +82,8 @@ test_check_phone_numbers_found() {
 
   output=$( check_phone_numbers "${TMP_DIR}" )
 
-  if [[ "${output}" == *"WARNING: found 5 phone number match(es):"* \
-    && "${output}" == *"(123) 456-7890"* && "${output}" == *"(123)-456-7890" \
+  if [[ "${output}" == *"WARNING: found 6 phone number match(es):"* \
+    && "${output}" == *"(123) 456-7890"* && "${output}" == *"(123)-456-7890"* \
     && "${output}" == *"123 456 7890"* && "${output}" == *"1234567890"* \
     && "${output}" == *"123-456-7890"* && "${output}" == *"123.456.7890"* ]]; then
     pass "${FUNCNAME}"
