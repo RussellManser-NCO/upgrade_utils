@@ -19,7 +19,7 @@ false_positive1="intel_ver=19.1.3.304"
 false_positive2="/path/to/software/intel/19.1.3.304"
 END
 
-  mkdir ${TMP_DIR}/.git
+  mkdir -p ${TMP_DIR}/.git
   cp ${TMP_DIR}/my_ip.sh ${TMP_DIR}/.git/
 }
 
@@ -34,8 +34,21 @@ phone_num5="1234567890"
 phone_num6="123.456.7890"
 END
 
-  mkdir ${TMP_DIR}/.git
+  mkdir -p ${TMP_DIR}/.git
   cp ${TMP_DIR}/my_phone_number.sh ${TMP_DIR}/.git/
+}
+
+create_data_transfer_files() {
+  for prtcl in "rsync" "ssh" "ftp" "hsi" "scp"; do
+    echo ${prtcl} '${SRC} ${DEST}' >> ${TMP_DIR}/data_transfer1.sh
+    echo ${prtcl} '${SECRET_SRC} ${SECRET_DEST}' >> ${TMP_DIR}/data_transfer2.sh
+  done
+
+  echo "SRC=login01" >> ${TMP_DIR}/src.txt
+  echo "DEST=login02" >> ${TMP_DIR}/dest.txt
+
+  mkdir -p ${TMP_DIR}/.git
+  cp ${TMP_DIR}/{data_transfer1.sh,data_transfer2.sh,src.txt,dest.txt} ${TMP_DIR}/.git/
 }
 
 setup() {
@@ -119,11 +132,38 @@ test_check_phone_numbers_not_found() {
 }
 
 test_check_data_transfer_found(){
-  fail "${FUNCNAME}" "Test is not implemented!"
+  setup
+
+  create_data_transfer_files
+
+  local output=$( check_data_transfer "${TMP_DIR}" )
+
+  if [[ "${output}" == *"WARNING: found 2 data transfer instance(s) with hard-coded sources or destinations:"* \
+      && "${output}" == *"${TMP_DIR}/src.txt:SRC"* \
+      && "${output}" == *"${TMP_DIR}/dest.txt:DEST"* ]]; then
+    pass "${FUNCNAME}"
+  else
+    fail "${FUNCNAME}" "Did not find the expected number of data transfer instances. Output: \n${output}"
+  fi
+
+  teardown
 }
 
 test_check_data_transfer_not_found(){
-  fail "${FUNCNAME}" "Test is not implemented!"
+  setup
+
+  create_ip_addresses_script
+  create_phone_numbers_script
+
+  local output=$( check_data_transfer "${TMP_DIR}" )
+
+  if [[ -z "${output}" ]]; then
+    pass "${FUNCNAME}"
+  else
+    fail "${FUNCNAME}" "Found one or more data transfer instances, but expected none. Output: \n${output}"
+  fi
+
+  teardown
 }
 
 main() {

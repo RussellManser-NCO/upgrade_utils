@@ -31,7 +31,30 @@ check_phone_numbers() {
 }
 
 check_data_transfer() {
-  echo "Function ${FUNCNAME} is not implemented!"
+  local path_to_check="$1"
+
+  for prtcl in "rsync" "ssh" "ftp" "scp" "hsi"; do
+    hits=$( grep -r --exclude-dir=".git" "${prtcl} " "${path_to_check}" )
+
+    # Find all unique variable names used in function calls
+    vrs=( $( echo "${hits}" | grep -Eo '(\ ?\$\{?[a-zA-Z0-9_]+\}?)+' ) )
+    sorted_vrs=( $( printf "%s\n" "${vrs[@]}" | sort | uniq ) )
+
+    # Search for variable assignment within the code
+    checks=()
+    for vr in "${sorted_vrs[@]}"; do
+      pat=$( echo ".*${vr}(\ +)?=" | sed -e 's/\$//' -e 's/{//' -e 's/}//' )
+      check=$( grep -rE --exclude-dir=".git" "${pat}" "${path_to_check}" )
+      if [[ -n "${check}" ]]; then
+        checks+=("${check}")
+      fi
+    done
+  done
+
+  if [[ -n "${checks[@]}" ]]; then
+    echo "WARNING: found ${#checks[@]} data transfer instance(s) with hard-coded sources or destinations:"
+    printf "%s\n" "${checks[@]}"
+  fi
 }
 
 main() {
