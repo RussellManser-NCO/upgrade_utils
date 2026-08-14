@@ -95,7 +95,19 @@ test_check_phone_numbers_found() {
 }
 
 test_check_phone_numbers_not_found() {
-  fail "${FUNCNAME}" "Test is not implemented!"
+  setup
+
+  create_ip_addresses_script
+
+  local output=$( check_phone_numbers "${TMP_DIR}" )
+
+  if [[ -z "${output}" ]]; then
+    pass "${FUNCNAME}"
+  else
+    fail "${FUNCNAME}" "Found one or more phone numbers, but expected none. Output: \n${output}"
+  fi
+
+  teardown
 }
 
 test_check_data_transfer_found(){
