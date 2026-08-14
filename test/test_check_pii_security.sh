@@ -15,6 +15,8 @@ create_ip_addresses_script() {
 #!/bin/bash
 my_ip=192.168.1.1
 another_ip=192.168.0.1
+false_positive1="intel_ver=19.1.3.304"
+false_positive2="/path/to/software/intel/19.1.3.304"
 END
 }
 

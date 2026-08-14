@@ -4,7 +4,12 @@
 
 check_ip_addresses() {
   local path_to_check="$1"
-  local check=$( grep -rE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${path_to_check}" )
+
+  # Ignore false positives for <software>_ver and paths to software
+  local check=$( grep -rP "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${path_to_check}" \
+    | grep -v "_ver" \
+    | grep -vE ".*:.*\/[a-z]+\/.*"
+  )
 
   if [[ -n "${check}" ]]; then
     echo "WARNING: found $( echo "${check}" | wc -l ) IP address match(es):"
