@@ -30,8 +30,7 @@ phone_num1="(123) 456-7890"
 phone_num2="(123)-456-7890"
 phone_num3="123-456-7890"
 phone_num4="123 456 7890"
-phone_num5="1234567890"
-phone_num6="123.456.7890"
+phone_num5="123.456.7890"
 END
 
   mkdir -p ${TMP_DIR}/.git
@@ -103,9 +102,9 @@ test_check_phone_numbers_found() {
 
   output=$( check_phone_numbers "${TMP_DIR}" )
 
-  if [[ "${output}" == *"WARNING: found 6 phone number match(es):"* \
+  if [[ "${output}" == *"WARNING: found 5 phone number match(es):"* \
     && "${output}" == *"(123) 456-7890"* && "${output}" == *"(123)-456-7890"* \
-    && "${output}" == *"123 456 7890"* && "${output}" == *"1234567890"* \
+    && "${output}" == *"123 456 7890"* && "${output}" != *"1234567890"* \
     && "${output}" == *"123-456-7890"* && "${output}" == *"123.456.7890"* ]]; then
     pass "${FUNCNAME}"
   else
@@ -179,13 +178,12 @@ test_main() {
     "${output}" == *"WARNING: found 2 IP address match(es):"* \
     && "${output}" == *"${TMP_DIR}/my_ip.sh:my_ip=192.168.1.1"* \
     && "${output}" == *"${TMP_DIR}/my_ip.sh:another_ip=192.168.0.1"* \
-    && "${output}" == *"WARNING: found 6 phone number match(es):"* \
+    && "${output}" == *"WARNING: found 5 phone number match(es):"* \
     && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num1="(123) 456-7890"'* \
     && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num2="(123)-456-7890"'* \
     && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num3="123-456-7890"'* \
     && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num4="123 456 7890"'* \
-    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num5="1234567890"'* \
-    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num6="123.456.7890"'* \
+    && "${output}" == *"${TMP_DIR}"'/my_phone_number.sh:phone_num5="123.456.7890"'* \
     && "${output}" == *"WARNING: found 2 data transfer instance(s) with hard-coded sources or destinations:"* \
     && "${output}" == *"${TMP_DIR}/dest.txt:DEST=login02"* \
     && "${output}" == *"${TMP_DIR}/src.txt:SRC=login01"* \

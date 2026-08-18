@@ -22,7 +22,7 @@ check_phone_numbers() {
   local path_to_check="$1"
 
   local check=$( grep -rP --exclude-dir=".git" \
-    '\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}' "${path_to_check}" )
+    '\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}' "${path_to_check}" )
 
   if [[ -n "${check}" ]]; then
     echo "WARNING: found $( echo "${check}" | wc -l ) phone number match(es):"
