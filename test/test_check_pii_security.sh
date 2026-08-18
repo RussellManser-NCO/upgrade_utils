@@ -172,6 +172,10 @@ test_main() {
   create_phone_numbers_script
   create_data_transfer_files
 
+  # Test if binary files are being ignored
+  dd if=/dev/zero of=${TMP_DIR}/file.bin bs=1K count=10 2>/dev/null
+  echo "192.168.1.1" >> ${TMP_DIR}/file.bin
+
   local output=$( main "${TMP_DIR}" )
 
   if [[ \
@@ -187,6 +191,7 @@ test_main() {
     && "${output}" == *"WARNING: found 2 data transfer instance(s) with hard-coded sources or destinations:"* \
     && "${output}" == *"${TMP_DIR}/dest.txt:DEST=login02"* \
     && "${output}" == *"${TMP_DIR}/src.txt:SRC=login01"* \
+    && "${output}" != *"Binary file ${TMP_DIR}/file.bin matches"* \
     ]]; then
     pass "${FUNCNAME}"
   else

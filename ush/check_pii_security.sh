@@ -6,7 +6,7 @@ check_ip_addresses() {
   local path_to_check="$1"
 
   # Ignore false positives for <software>_ver and paths to software
-  local check=$( grep -rP --exclude-dir=".git" \
+  local check=$( grep -rPI --exclude-dir=".git" \
     "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" "${path_to_check}" \
       | grep -v "_ver" \
       | grep -vE ".*:.*\/[a-z]+\/.*"
@@ -21,7 +21,7 @@ check_ip_addresses() {
 check_phone_numbers() {
   local path_to_check="$1"
 
-  local check=$( grep -rP --exclude-dir=".git" \
+  local check=$( grep -rPI --exclude-dir=".git" \
     '\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}' "${path_to_check}" )
 
   if [[ -n "${check}" ]]; then
@@ -34,7 +34,7 @@ check_data_transfer() {
   local path_to_check="$1"
 
   for prtcl in "rsync" "ssh" "ftp" "scp" "hsi"; do
-    hits=$( grep -r --exclude-dir=".git" "${prtcl} " "${path_to_check}" )
+    hits=$( grep -rI --exclude-dir=".git" "${prtcl} " "${path_to_check}" )
 
     # Find all unique variable names used in function calls
     vrs=( $( echo "${hits}" | grep -Eo '(\ ?\$\{?[a-zA-Z0-9_]+\}?)+' ) )
@@ -44,7 +44,7 @@ check_data_transfer() {
     checks=()
     for vr in "${sorted_vrs[@]}"; do
       pat=$( echo ".*${vr}(\ +)?=" | sed -e 's/\$//' -e 's/{//' -e 's/}//' )
-      check=$( grep -rE --exclude-dir=".git" "${pat}" "${path_to_check}" )
+      check=$( grep -rEI --exclude-dir=".git" "${pat}" "${path_to_check}" )
       if [[ -n "${check}" ]]; then
         checks+=("${check}")
       fi
