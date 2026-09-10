@@ -30,6 +30,25 @@ check_phone_numbers() {
   fi
 }
 
+check_absolute_paths() {
+  local path_to_check="$1"
+
+  # Find all path patterns, then filter out:
+  # - ".."
+  # - shebangs
+  # - variable assignments for relative paths
+  # - Web addresses
+  local check=$( grep -rPI --exclude-dir=".git" \
+    '\/[\w.~\/-]*' "${path_to_check}" \
+      | grep -vP "(\.\.)|(\#\!)|(=\w)|(https?:\/\/(www\.)?)" \
+  )
+
+  if [[ -n "${check}" ]]; then
+    echo "WARNING: found $( echo "${check}" | wc -l ) absolute path match(es):"
+    echo "${check}"
+  fi
+}
+
 check_data_transfer() {
   local path_to_check="$1"
 
@@ -68,6 +87,7 @@ main() {
   ip_result=$( check_ip_addresses "${pkg_path}" )
   phone_result=$( check_phone_numbers "${pkg_path}" )
   data_xfer_result=$( check_data_transfer "${pkg_path}" )
+  abs_path_result=$( check_absolute_paths "${pkg_path}" )
 
   err=0
   if [[ -n "${ip_result}" ]]; then
@@ -81,6 +101,9 @@ main() {
   if [[ -n "${data_xfer_result}" ]]; then
     err=1
     echo "${data_xfer_result}"
+  fi
+  if [[ -n "${abs_path_result}" ]]; then
+    err=1
   fi
 
   exit ${err}

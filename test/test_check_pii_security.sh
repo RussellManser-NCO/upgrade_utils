@@ -50,6 +50,28 @@ create_data_transfer_files() {
   cp ${TMP_DIR}/{data_transfer1.sh,data_transfer2.sh,src.txt,dest.txt} ${TMP_DIR}/.git/
 }
 
+create_absolute_path_script() {
+  cat << END > ${TMP_DIR}/my_absolute_paths.sh
+#!/bin/bash
+
+# Expected matches
+/path/to/data
+my_data=/path/to/data
+  /absolute/indented/path/34/
+~/my/home/dir
+
+# Expected skips
+path=relative/path
+path=relative/path/../stuff
+../relative/path
+path="../relative/path"
+https://www.website.com
+END
+
+  mkdir -p ${TMP_DIR}/.git/
+  cp ${TMP_DIR}/my_absolute_paths.sh ${TMP_DIR}/.git/
+}
+
 setup() {
   source "${SCRIPT_UNDER_TEST}"
 
@@ -165,6 +187,31 @@ test_check_data_transfer_not_found(){
   teardown
 }
 
+test_check_absolute_paths_found() {
+  setup
+
+  create_absolute_path_script
+
+  local output=$( check_absolute_paths "${TMP_DIR}" )
+
+  if [[ "${output}" == *"WARNING: found 4 absolute path match(es):"* \
+    && "${output}" == *"/path/to/data"* \
+    && "${output}" == *"my_data=/path/to/data"* \
+    && "${output}" == *"  /absolute/indented/path/34/"*
+    && "${output}" == *"~/my/home/dir"*
+  ]]; then
+    pass "${FUNCNAME}"
+  else
+    fail "${FUNCNAME}" "Did not find the expected number of absolute path matches. Output: \n${output}"
+  fi
+
+  teardown
+}
+
+test_check_absolute_paths_not_found() {
+  fail "${FUNCNAME}" "Test is not implemented"
+}
+
 test_main() {
   setup
 
@@ -222,6 +269,8 @@ main() {
   test_check_phone_numbers_not_found
   test_check_data_transfer_found
   test_check_data_transfer_not_found
+  test_check_absolute_paths_found
+  test_check_absolute_paths_not_found
   test_main
 
   echo "---------------------------------------------------"
